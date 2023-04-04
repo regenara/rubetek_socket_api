@@ -53,7 +53,7 @@ class RubetekSocketAPI:
                         continue
                     if response.status not in (200, 204):
                         self._logger.error('Unsuccessful request=%s response=%s', data, json)
-                        raise RubetekSocketAPIError(json.get("error_description") or json.get("error") or json)
+                        raise RubetekSocketAPIError(json.get('error_description') or json.get('error') or str(json))
                     self._logger.info('Successful request=%s response=%s', data, json)
                     return json
 
