@@ -92,5 +92,9 @@ class RubetekSocketAPI:
     async def get_status(self) -> dict[str, Any]:
         url = urljoin(self._base_url, f'/v6/houses/{self._house_id}/devices?per_page=500')
         response = await self._send_request(url=url)
-        state = [data['state'] for data in response['devices'] if data['id'] == self._device_id][0]
-        return {'enabled': state.get('relay:on[0]', False), 'rgb_level': state['rgb:level[1]']}
+        result = [data for data in response['devices'] if data['id'] == self._device_id][0]
+        return {
+            'enabled': result['state'].get('relay:on[0]', False),
+            'rgb_level': result['state'].get('rgb:level[1]'),
+            'online': result['online']
+        }
