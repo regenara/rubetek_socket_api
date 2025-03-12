@@ -12,10 +12,10 @@ pip install rubetek-socket-api
 ## Авторизация / Authorization
 
 ### Получение refresh token, client id и client secret / Obtaining refresh token, client id and client secret
-Чтобы получить `refresh_token`, `client_id` и `client_secret`, перехватите запросы из мобильного приложения Rubetek. Я использовал Android-устройство и [HTTP Toolkit](https://httptoolkit.com/). Перехватывать запросы нужно в только что установленном или предварительно разлогиненном приложении.
-<br>To retrieve `refresh_token`, `client_id`, and `client_secret`, intercept requests from the Rubetek mobile app. I used an Android device and [HTTP Toolkit](https://httptoolkit.com/). Requests should be captured in a freshly installed or previously logged-out application.
+Чтобы получить `refresh_token`, `client_id` и `client_secret`, перехватите запросы из мобильного приложения Rubetek. В примере используется Android-устройство и [HTTP Toolkit](https://httptoolkit.com/). Запросы следует перехватывать во время попытки авторизации в приложении Rubetek.
+<br>To obtain the `refresh_token`, `client_id`, and `client_secret`, intercept the requests from the Rubetek mobile app. The example uses an Android device and [HTTP Toolkit](https://httptoolkit.com/). The requests should be intercepted during the authentication attempt in the Rubetek app.
 <details>
-  <summary>Показать изображения / Show images</summary>
+  <summary>Примеры / Examples</summary>
 
 ![refresh_token](https://raw.githubusercontent.com/regenara/rubetek_socket_api/master/images/refresh_token.jpg)
 *Refresh Token*
