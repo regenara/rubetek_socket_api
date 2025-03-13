@@ -228,8 +228,11 @@ class RubetekSocketAPI:
         :param value: Minutes, min 0, max 109
         """
         TimerValidation(value=value)
+        value = value * TIMER_VALUE
+        if value:
+            value += 1
         state = {
-            'relay:mode[0]': self._overflow_value(value=(value - 1) * TIMER_VALUE + TIMER_VALUE + 1)
+            'relay:mode[0]': self._overflow_value(value=value)
         }
         await self._set_state(house_id=house_id, device_id=device_id, state=state)
 
