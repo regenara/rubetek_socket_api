@@ -1,6 +1,6 @@
 [project]
 name = "rubetek_socket_api"
-version = "0.0.3"
+version = "0.0.4"
 description = "API wrapper for controlling the Rubetek RE-3305 smart socket."
 authors = [
     { name = "regenara", email = "jakebv.22@gmail.com" }

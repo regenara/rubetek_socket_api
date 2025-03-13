@@ -35,7 +35,7 @@ from .models import (INT_MAX,
 
 class RubetekSocketAPI:
     def __init__(self, refresh_token: Optional[str] = None, client_id: Optional[str] = None,
-                 client_secret: Optional[str] = None, timeout: int = 30):
+                 client_secret: Optional[str] = None, timeout: int = 30, level: logging = logging.INFO):
 
         if not ((refresh_token is not None) ^ (client_id is not None and client_secret is not None)):
             raise ValueError('Either "refresh_token" or "client_id" & "client_secret" must be provided.')
@@ -47,7 +47,7 @@ class RubetekSocketAPI:
         self._base_url: str = 'https://ccc.rubetek.com/'
         self._iot_url: str = 'https://iot.rubetek.com/'
         self._logger: logging = logging.getLogger('RubetekSocketAPI')
-        self._logger.setLevel(logging.INFO)
+        self._logger.setLevel(level)
 
         ssl_context = ssl.create_default_context(cafile=certifi.where())
         self.session: ClientSession = ClientSession(connector=TCPConnector(ssl=ssl_context),
