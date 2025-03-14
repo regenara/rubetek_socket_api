@@ -17,11 +17,11 @@ from aiohttp import (ClientSession,
 from aiohttp.client_exceptions import (ClientConnectorError,
                                        ContentTypeError)
 
-from .exceptions import (ClientConnectorRubetekSocketAPIError,
+from .exceptions import (AuthorizationRequiredRubetekSocketAPIError,
+                         ClientConnectorRubetekSocketAPIError,
                          TimeoutRubetekSocketAPIError,
                          UnauthorizedRubetekSocketAPIError,
                          UnknownRubetekSocketAPIError)
-
 from .models import (INT_MAX,
                      INT_MIN,
                      TIMER_VALUE,
@@ -34,15 +34,11 @@ from .models import (INT_MAX,
 
 
 class RubetekSocketAPI:
-    def __init__(self, refresh_token: Optional[str] = None, client_id: Optional[str] = None,
-                 client_secret: Optional[str] = None, timeout: int = 30, level: logging = logging.INFO):
-
-        if not ((refresh_token is not None) ^ (client_id is not None and client_secret is not None)):
-            raise ValueError('Either "refresh_token" or "client_id" & "client_secret" must be provided.')
+    def __init__(self, refresh_token: Optional[str] = None, timeout: int = 30, level: logging = logging.INFO):
 
         self.refresh_token = refresh_token
-        self._client_id = client_id
-        self._client_secret = client_secret
+        self._client_id = 'ckvfvkClm2IdPrkSlvWSe3KiEWJOAbyKOQR5giCYYAo'
+        self._client_secret = '_TiXiy8xkVmVEpTBoYndqvyYbldXFs00wBtgLNmSOCE'
         self._access_token: Optional[str] = None
         self._base_url: str = 'https://ccc.rubetek.com/'
         self._iot_url: str = 'https://iot.rubetek.com/'
@@ -91,6 +87,9 @@ class RubetekSocketAPI:
 
             except UnauthorizedRubetekSocketAPIError:
                 self._logger.error('Response=%s UnauthorizedRubetekSocketAPIError, trying get access_token', request_id)
+                if self.refresh_token is None:
+                    self._logger.error('Response=%s AuthorizationRequiredRubetekSocketAPIError', request_id)
+                    raise AuthorizationRequiredRubetekSocketAPIError
                 await self._set_access_token()
 
     @staticmethod
@@ -120,10 +119,14 @@ class RubetekSocketAPI:
         await self._send_request(url=url, method='PATCH', json=json)
 
     async def send_code(self, email: Optional[str] = None, phone: Optional[str] = None):
-        if self._client_id is None:
-            raise ValueError('This method can only be used with "client_id" & "client_secret"')
+        """
+        :param email: The email address to receive the verification code
+        :param phone: The phone number to receive the verification code.
+                      Must start with '+' followed by the country code and number
+        """
         if not ((email is not None) ^ (phone is not None)):
             raise ValueError('Either "email" or "phone" must be provided.')
+
         url = urljoin(self._iot_url, 'api/v1/code_requests')
         json = {
             'code_request': {
@@ -148,10 +151,15 @@ class RubetekSocketAPI:
 
     async def change_code_to_access_token(self, code: Union[int, str], email: Optional[str] = None,
                                           phone: Optional[str] = None) -> Token:
-        if self._client_id is None:
-            raise ValueError('This method can only be used with "client_id" & "client_secret"')
+        """
+        :param code: The code received via email or phone
+        :param email: The email address to receive the verification code
+        :param phone: The phone number to receive the verification code.
+                      Must start with '+' followed by the country code and number
+        """
         if not ((email is not None) ^ (phone is not None)):
             raise ValueError('Either "email" or "phone" must be provided.')
+
         url = urljoin(self._iot_url, 'oauth/token')
         params = {
             'client_id': self._client_id,
@@ -183,12 +191,19 @@ class RubetekSocketAPI:
         return [House(**h) for h in response]
 
     async def get_house_devices(self, house_id: str) -> List[Device]:
+        """
+        :param house_id: The house ID, can be obtained using the get_houses method
+        """
         url = urljoin(self._base_url, f'v6/houses/{house_id}/devices')
         params = {'per_page': 500, 'include_deleted': 'true'}
         response = await self._send_request(url=url, params=params)
         return [Device(**d) for d in response['devices']]
 
     async def get_device(self, house_id: str, device_id: str) -> Optional[Device]:
+        """
+        :param house_id: The house ID, can be obtained using the get_houses method
+        :param device_id: The device ID, can be obtained using the get_house_devices method
+        """
         devices = await self.get_house_devices(house_id=house_id)
         device = next((d for d in devices if d.id == device_id), None)
         return device
