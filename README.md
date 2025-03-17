@@ -3,7 +3,7 @@
 ### Описание / Description 
 Эта библиотека предоставляет API-обертку для управления умной розеткой Rubetek RE-3305 и умным сетевым фильтром RE-3310. Возможность работы с другими моделями не проверялась, но, вероятно, поддерживается. Для использования данной библиотеки необходимо быть зарегистрированным пользователем в приложении Rubetek, а также иметь устройство, добавленное в это приложение.
 
-This library provides an API wrapper for controlling the Rubetek RE-3305 smart socket and smart surge protector RE-3310. While compatibility with other models has not been tested, it is likely supported. To use this library, you must be a registered user in the Rubetek app and have your device added to the this app.
+This library provides an API wrapper for controlling the Rubetek RE-3305 smart socket and smart power strip RE-3310. While compatibility with other models has not been tested, it is likely supported. To use this library, you must be a registered user in the Rubetek app and have your device added to the this app.
 
 
 ## Установка / Installation

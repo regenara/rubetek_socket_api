@@ -3,6 +3,7 @@ import logging
 import ssl
 from contextlib import suppress
 from json.decoder import JSONDecodeError
+from pathlib import Path
 from typing import (Any,
                     Dict,
                     List,
@@ -36,12 +37,13 @@ from .models import (INT_MAX,
 
 
 class RubetekSocketAPI:
-    def __init__(self, refresh_token: Optional[str] = None, refresh_token_path: str = 'rubetek_refresh_token',
+    def __init__(self, refresh_token: Optional[str] = None,
+                 refresh_token_path: Optional[Path] = Path('./rubetek_refresh_token'),
                  timeout: int = 30, level: logging = logging.INFO):
-        self.refresh_token = refresh_token
-        self.refresh_token_path = refresh_token_path
-        self._client_id = 'ckvfvkClm2IdPrkSlvWSe3KiEWJOAbyKOQR5giCYYAo'
-        self._client_secret = '_TiXiy8xkVmVEpTBoYndqvyYbldXFs00wBtgLNmSOCE'
+        self.refresh_token: Optional[str] = refresh_token
+        self.refresh_token_path: Optional[Path] = refresh_token_path
+        self._client_id: str = 'ckvfvkClm2IdPrkSlvWSe3KiEWJOAbyKOQR5giCYYAo'
+        self._client_secret: str = '_TiXiy8xkVmVEpTBoYndqvyYbldXFs00wBtgLNmSOCE'
         self._access_token: Optional[str] = None
         self._base_url: str = 'https://ccc.rubetek.com/'
         self._iot_url: str = 'https://iot.rubetek.com/'
@@ -90,9 +92,7 @@ class RubetekSocketAPI:
 
             except UnauthorizedRubetekSocketAPIError:
                 self._logger.error('Response=%s UnauthorizedRubetekSocketAPIError, trying get access_token', request_id)
-                if not self._check_refresh_token():
-                    self._logger.error('Response=%s AuthorizationRequiredRubetekSocketAPIError', request_id)
-                    raise AuthorizationRequiredRubetekSocketAPIError
+                self._check_refresh_token(request_id=request_id)
                 await self._set_access_token()
 
     @staticmethod
@@ -103,12 +103,20 @@ class RubetekSocketAPI:
             value += 2 ** 32
         return value
 
-    def _check_refresh_token(self) -> bool:
-        if not self.refresh_token:
+    def _check_refresh_token(self, request_id: str):
+        if not self.refresh_token and self.refresh_token_path:
             with suppress(FileNotFoundError):
                 with open(self.refresh_token_path) as f:
                     self.refresh_token = f.read()
-        return bool(self.refresh_token)
+        if not self.refresh_token:
+            self._logger.error('Response=%s AuthorizationRequiredRubetekSocketAPIError', request_id)
+            raise AuthorizationRequiredRubetekSocketAPIError
+
+    def _save_refresh_token(self, refresh_token: str):
+        if self.refresh_token_path:
+            with open(self.refresh_token_path, 'w') as f:
+                f.write(refresh_token)
+            self._logger.info('New refresh token saved to file %s', self.refresh_token_path)
 
     async def _set_access_token(self):
         url = urljoin(self._base_url, 'v5/oauth/access_token')
@@ -192,9 +200,7 @@ class RubetekSocketAPI:
         token = Token(**response)
         self._access_token = token.access_token
         self.refresh_token = token.refresh_token
-        with open(self.refresh_token_path, 'w') as f:
-            f.write(self.refresh_token)
-        self._logger.info('New refresh token saved to file refresh_token')
+        self._save_refresh_token(refresh_token=token.refresh_token)
         return token
 
     async def get_houses(self) -> List[House]:
