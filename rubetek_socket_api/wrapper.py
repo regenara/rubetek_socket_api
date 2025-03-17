@@ -36,9 +36,10 @@ from .models import (INT_MAX,
 
 
 class RubetekSocketAPI:
-    def __init__(self, refresh_token: Optional[str] = None, timeout: int = 30, level: logging = logging.INFO):
-
+    def __init__(self, refresh_token: Optional[str] = None, refresh_token_path: str = 'rubetek_refresh_token',
+                 timeout: int = 30, level: logging = logging.INFO):
         self.refresh_token = refresh_token
+        self.refresh_token_path = refresh_token_path
         self._client_id = 'ckvfvkClm2IdPrkSlvWSe3KiEWJOAbyKOQR5giCYYAo'
         self._client_secret = '_TiXiy8xkVmVEpTBoYndqvyYbldXFs00wBtgLNmSOCE'
         self._access_token: Optional[str] = None
@@ -105,7 +106,7 @@ class RubetekSocketAPI:
     def _check_refresh_token(self) -> bool:
         if not self.refresh_token:
             with suppress(FileNotFoundError):
-                with open('refresh_token') as f:
+                with open(self.refresh_token_path) as f:
                     self.refresh_token = f.read()
         return bool(self.refresh_token)
 
@@ -191,7 +192,7 @@ class RubetekSocketAPI:
         token = Token(**response)
         self._access_token = token.access_token
         self.refresh_token = token.refresh_token
-        with open('refresh_token', 'w') as f:
+        with open(self.refresh_token_path, 'w') as f:
             f.write(self.refresh_token)
         self._logger.info('New refresh token saved to file refresh_token')
         return token
