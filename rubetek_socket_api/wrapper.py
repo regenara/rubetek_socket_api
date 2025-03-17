@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import ssl
+from contextlib import suppress
 from json.decoder import JSONDecodeError
 from typing import (Any,
                     Dict,
@@ -27,6 +28,7 @@ from .models import (INT_MAX,
                      TIMER_VALUE,
                      Device,
                      House,
+                     RelayValidation,
                      RGBLevelValidation,
                      TimerValidation,
                      Token,
@@ -87,7 +89,7 @@ class RubetekSocketAPI:
 
             except UnauthorizedRubetekSocketAPIError:
                 self._logger.error('Response=%s UnauthorizedRubetekSocketAPIError, trying get access_token', request_id)
-                if self.refresh_token is None:
+                if not self._check_refresh_token():
                     self._logger.error('Response=%s AuthorizationRequiredRubetekSocketAPIError', request_id)
                     raise AuthorizationRequiredRubetekSocketAPIError
                 await self._set_access_token()
@@ -99,6 +101,13 @@ class RubetekSocketAPI:
         elif value < INT_MIN:
             value += 2 ** 32
         return value
+
+    def _check_refresh_token(self) -> bool:
+        if not self.refresh_token:
+            with suppress(FileNotFoundError):
+                with open('refresh_token') as f:
+                    self.refresh_token = f.read()
+        return bool(self.refresh_token)
 
     async def _set_access_token(self):
         url = urljoin(self._base_url, 'v5/oauth/access_token')
@@ -182,6 +191,9 @@ class RubetekSocketAPI:
         token = Token(**response)
         self._access_token = token.access_token
         self.refresh_token = token.refresh_token
+        with open('refresh_token', 'w') as f:
+            f.write(self.refresh_token)
+        self._logger.info('New refresh token saved to file refresh_token')
         return token
 
     async def get_houses(self) -> List[House]:
@@ -213,14 +225,16 @@ class RubetekSocketAPI:
         response = await self._send_request(url=url)
         return User(**response)
 
-    async def set_on_off(self, house_id: str, device_id: str, value: bool):
+    async def set_on_off(self, house_id: str, device_id: str, value: bool, relay: int = 0):
         """
         :param house_id: The house ID, can be obtained using the get_houses method
         :param device_id: The device ID, can be obtained using the get_house_devices method
         :param value: True - on, False - off
+        :param relay: Relay index
         """
+        RelayValidation(value=value)
         state = {
-            'relay:on[0]': value
+            f'relay:on[{relay}]': value
         }
         await self._set_state(house_id=house_id, device_id=device_id, state=state)
 

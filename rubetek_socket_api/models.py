@@ -39,23 +39,13 @@ class House(BaseModel):
     access: str
 
 
-class CustomData(BaseModel):
-    global_position: int
-    ip_address: str
-    key: str
-    moduleName: str
-    timersOff: str
-    timersOn: str
-    timers_migrated: bool
-
-
 class DeviceState(BaseModel):
     child_ev1527_lastAction: int = Field(alias='child:ev1527:lastAction')
     cloud_online: bool = Field(alias='cloud:online')
     cloud_regUrl: str = Field(alias='cloud:regUrl')
     cloud_wsUrl: str = Field(alias='cloud:wsUrl')
     dev_features: str = Field(alias='dev:features')
-    dev_fw_libESP32_version: int = Field(alias='dev:fw:libESP32:version')
+    dev_fw_libESP32_version: Optional[int] = Field(None, alias='dev:fw:libESP32:version')
     dev_fw_loglevel: int = Field(alias='dev:fw:loglevel')
     dev_hostname: str = Field(alias='dev:hostname')
     dev_id: str = Field(alias='dev:id')
@@ -63,28 +53,31 @@ class DeviceState(BaseModel):
     dev_type: str = Field(alias='dev:type')
     dev_version: str = Field(alias='dev:version')
     health_status: int = Field(alias='health:status')
-    homekit_cid: int = Field(alias='homekit:cid')
-    hub_act_free_size: int = Field(alias='hub:act:free_size')
-    protect_power_maxI: float = Field(alias='protect:power:maxI')
-    protect_temper_maxT: int = Field(alias='protect:temper:maxT')
-    pwr_Irms: float = Field(alias='pwr:Irms')
+    homekit_cid: Optional[int] = Field(None, alias='homekit:cid')
+    hub_act_free_size: Optional[int] = Field(None, alias='hub:act:free_size')
+    protect_power_maxI: Optional[float] = Field(None, alias='protect:power:maxI')
+    protect_temper_maxT: Optional[int] = Field(None, alias='protect:temper:maxT')
+    pwr_Irms: Optional[float] = Field(None, alias='pwr:Irms')
     pwr_Pact: float = Field(alias='pwr:Pact')
-    pwr_Pact_sum: float = Field(alias='pwr:Pact_sum')
-    pwr_Pact_sum_hourly: float = Field(alias='pwr:Pact_sum:hourly')
-    pwr_Vrms: float = Field(alias='pwr:Vrms')
-    relay_change_src: int = Field(alias='relay:change_src[0]')
+    pwr_Pact_sum: Optional[float] = Field(None, alias='pwr:Pact_sum')
+    pwr_Pact_sum_hourly: Optional[float] = Field(None, alias='pwr:Pact_sum:hourly')
+    pwr_Vrms: Optional[float] = Field(None, alias='pwr:Vrms')
+    relay_change_src: Optional[int] = Field(None, alias='relay:change_src[0]')
     relay_off_delay_us: int = Field(alias='relay:off_delay_us[0]')
-    relay_on: bool = Field(alias='relay:on[0]')
+    relay_on_0: bool = Field(alias='relay:on[0]')
+    relay_on_1: bool = Field(alias='relay:on[1]')
+    relay_on_2: bool = Field(alias='relay:on[2]')
+    relay_on_3: bool = Field(alias='relay:on[3]')
     relay_mode: int = Field(alias='relay:mode[0]')
     relay_on_delay_us: int = Field(alias='relay:on_delay_us[0]')
     relay_state_restore: bool = Field(alias='relay:state:restore')
-    rf868_fota_dev_type_str: str = Field(alias='rf868:fota:dev_type_str')
-    rf868_hub_key_0: int = Field(alias='rf868:hub:key[0]')
-    rf868_hub_key_1: int = Field(alias='rf868:hub:key[1]')
-    rf868_hub_key_2: int = Field(alias='rf868:hub:key[2]')
-    rf868_hub_key_3: int = Field(alias='rf868:hub:key[3]')
-    rf868_hub_id: int = Field(alias='rf868:hub_id')
-    rgb_level: int = Field(alias='rgb:level[1]')
+    rf868_fota_dev_type_str: Optional[str] = Field(None, alias='rf868:fota:dev_type_str')
+    rf868_hub_key_0: Optional[int] = Field(None, alias='rf868:hub:key[0]')
+    rf868_hub_key_1: Optional[int] = Field(None, alias='rf868:hub:key[1]')
+    rf868_hub_key_2: Optional[int] = Field(None, alias='rf868:hub:key[2]')
+    rf868_hub_key_3: Optional[int] = Field(None, alias='rf868:hub:key[3]')
+    rf868_hub_id: Optional[int] = Field(None, alias='rf868:hub_id')
+    rgb_level: Optional[int] = Field(None, alias='rgb:level[1]')
     rtc_tz: int = Field(alias='rtc:tz')
     wifi_ip: str = Field(alias='wifi:ip')
     wifi_ssid: str = Field(alias='wifi:ssid')
@@ -93,6 +86,9 @@ class DeviceState(BaseModel):
     @classmethod
     def get_relay_on(cls, values: dict) -> dict:
         values['relay:on[0]'] = values.get('relay:on[0]', False)
+        values['relay:on[1]'] = values.get('relay:on[1]', False)
+        values['relay:on[2]'] = values.get('relay:on[2]', False)
+        values['relay:on[3]'] = values.get('relay:on[3]', False)
         relay_mode_value = values.get('relay:mode[0]', 0)
         if relay_mode_value < 0:
             relay_mode_value += 2 ** 32
@@ -114,7 +110,6 @@ class Device(BaseModel):
     hidden: bool
     favorite: bool
     disabled: bool
-    custom_data: CustomData
     online: bool
     state: DeviceState
 
@@ -142,3 +137,7 @@ class RGBLevelValidation(BaseModel):
 
 class TimerValidation(BaseModel):
     value: conint(ge=0, le=109)
+
+
+class RelayValidation(BaseModel):
+    value: conint(ge=0, le=3)
