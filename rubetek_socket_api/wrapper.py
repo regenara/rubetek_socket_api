@@ -83,7 +83,7 @@ class RubetekSocketAPI:
                 raise UnknownRubetekSocketAPIError(f'Unknown error: {response.status} {response.reason}')
 
             except asyncio.exceptions.TimeoutError:
-                self._logger.error('Response=%s TimeoutRubetekSocketAPIErro', request_id)
+                self._logger.error('Response=%s TimeoutRubetekSocketAPIError', request_id)
                 raise TimeoutRubetekSocketAPIError('Timeout error')
 
             except ClientConnectorError:
