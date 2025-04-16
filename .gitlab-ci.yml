@@ -38,9 +38,9 @@ publish_rubetek_socket_api:
     - if: '$CI_COMMIT_BRANCH == "master"'
       changes:
         - pyproject.toml
-      when: manual
   script:
     - cat /home/mstoneho/.pypirc > .pypirc
     - twine upload -r pypi --config-file .pypirc dist/*
-    - git push github master
+    - git fetch origin master
+    - git push github origin/master:master
   needs: ["build_rubetek_socket_api"]
