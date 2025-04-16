@@ -42,6 +42,6 @@ publish_rubetek_socket_api:
   script:
     - cat /home/mstoneho/.pypirc > .pypirc
     - twine upload -r pypi --config-file .pypirc dist/*
-    - git remote set-url github git@github.com:regenara/rubetek_socket_api.git
+    - git remote add github git@github.com:regenara/rubetek_socket_api.git
     - git push github master
   needs: ["build_rubetek_socket_api"]
