@@ -40,6 +40,7 @@ publish_rubetek_socket_api:
         - pyproject.toml
       when: manual
   script:
+    - cat /home/mstoneho/.pypirc > .pypirc
     - twine upload -r pypi --config-file .pypirc dist/*
     - git push origin master
   needs: ["build_rubetek_socket_api"]
