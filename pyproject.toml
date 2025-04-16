@@ -20,4 +20,3 @@ homepage = "https://github.com/regenara/rubetek_socket_api"
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
-
