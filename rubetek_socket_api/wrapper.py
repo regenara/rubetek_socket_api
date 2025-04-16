@@ -274,3 +274,4 @@ class RubetekSocketAPI:
 
     async def close(self):
         await self.session.close()
+

@@ -1,6 +1,6 @@
 [project]
 name = "rubetek_socket_api"
-version = "0.1.11"
+version = "0.1.12"
 description = "API wrapper for controlling the Rubetek RE-3305 smart socket."
 authors = [
     { name = "regenara", email = "jakebv.22@gmail.com" }
@@ -20,5 +20,4 @@ homepage = "https://github.com/regenara/rubetek_socket_api"
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
-
 
