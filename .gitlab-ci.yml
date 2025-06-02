@@ -41,6 +41,4 @@ publish_rubetek_socket_api:
   script:
     - cat /home/mstoneho/.pypirc > .pypirc
     - twine upload -r pypi --config-file .pypirc dist/*
-    - git fetch origin master
-    - git push github origin/master:master
   needs: ["build_rubetek_socket_api"]
