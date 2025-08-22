@@ -24,6 +24,7 @@ from .exceptions import (AuthorizationRequiredRubetekSocketAPIError,
                          TimeoutRubetekSocketAPIError,
                          UnauthorizedRubetekSocketAPIError,
                          UnknownRubetekSocketAPIError)
+from .logger import SafeLogger
 from .models import (INT_MAX,
                      INT_MIN,
                      TIMER_VALUE,
@@ -47,7 +48,7 @@ class RubetekSocketAPI:
         self._access_token: Optional[str] = None
         self._base_url: str = 'https://ccc.rubetek.com/'
         self._iot_url: str = 'https://iot.rubetek.com/'
-        self._logger: logging = logging.getLogger('RubetekSocketAPI')
+        self._logger = SafeLogger('RubetekSocketAPI')
         self._logger.setLevel(level)
 
         ssl_context = ssl.create_default_context(cafile=certifi.where())
@@ -62,8 +63,8 @@ class RubetekSocketAPI:
                 'Content-Type': 'application/json; charset=UTF-8'
             }
             request_id = uuid4().hex
-            self._logger.info('Request=%s method=%s url=%s params=%s json=%s',
-                              request_id, method, url, params, json)
+            self._logger.info('Request=%s method=%s url=%s params=%s json=%s headers=%s',
+                              request_id, method, url, params, json, headers_)
             try:
                 async with self.session.request(method, url, params=params, json=json, headers=headers_) as response:
                     json_response = await response.json() if response.status == 200 else {}
